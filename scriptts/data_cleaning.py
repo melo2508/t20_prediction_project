@@ -58,7 +58,8 @@ def main():
     final_df = merge_data(training_df, match_df, batsman_agg, bowler_agg)
     
     # Save the cleaned data
-    final_df.to_csv(r"C:\Users\DELL\Desktop\Amex_Superbowl\t20_prediction_project\data\processed", index=False)
+    final_df.to_csv(r"C:\Users\DELL\Desktop\Amex_Superbowl\t20_prediction_project\data\processed\final_data.csv", index=False)
+
 
 if __name__ == '__main__':
     main()
