@@ -9,13 +9,18 @@ def load_data():
     return match_df, batsman_df, bowler_df, training_df
 
 def clean_match_data(match_df):
-    match_df = match_df.dropna(subset=['match id', 'team1_id', 'team2_id', 'inning1_runs', 'inning1_wickets'])
-    match_df['run_rate_inning1'] = match_df['inning1_runs'] / match_df['inning1_wickets']
+    # Check for missing values
+    print(match_df.isnull().sum())
+
+    # Drop rows with missing critical information or impute them
+    match_df = match_df.dropna(subset=['match id', 'team1_id', 'team2_id', 'inning1_runs', 'inning1_wickets', 'inning1_balls', 'inning2_runs', 'inning2_wickets', 'inning2_balls', 'winner_id'])
+    
+    #feature: run_rate_inning1
+    #match_df['run_rate_inning1'] = match_df['inning1_runs'] / match_df['inning1_wickets']
     return match_df
 
 def clean_batsman_data(batsman_df):
     batsman_df = batsman_df.dropna(subset=['match_id', 'batsman_id', 'inning', 'runs', 'balls_faced'])
-    batsman_df['strike_rate'] = (batsman_df['runs'] / batsman_df['balls_faced']) * 100
     return batsman_df
     
 def aggregate_batsman_data(batsman_df):
@@ -23,12 +28,12 @@ def aggregate_batsman_data(batsman_df):
         'runs': 'sum',
         'balls_faced': 'sum'
     }).reset_index()
-    batsman_agg['strike_rate'] = (batsman_agg['runs'] / batsman_agg['balls_faced']) * 100
+    #batsman_agg['strike_rate'] = (batsman_agg['runs'] / batsman_agg['balls_faced']) * 100
     return batsman_agg
 
 def clean_bowler_data(bowler_df):
     bowler_df = bowler_df.dropna(subset=['match_id', 'bowler_id', 'inning', 'runs', 'wicket_count'])
-    bowler_df['economy_rate'] = bowler_df['runs'] / bowler_df['wicket_count']
+    
     return bowler_df
 
 def aggregate_bowler_data(bowler_df):
@@ -36,12 +41,12 @@ def aggregate_bowler_data(bowler_df):
         'runs': 'sum',
         'wicket_count': 'sum'
     }).reset_index()
-    bowler_agg['economy_rate'] = bowler_agg['runs'] / bowler_agg['wicket_count']
+    #bowler_agg['economy_rate'] = bowler_agg['runs'] / bowler_agg['wicket_count']
     return bowler_agg
 
 def merge_data(training_df, match_df, batsman_agg, bowler_agg):
-    combined_df = match_df.merge(batsman_agg, on=['match id', 'inning'], how='left')
-    combined_df = combined_df.merge(bowler_agg, on=['match id', 'inning'], how='left')
+    combined_df = match_df.merge(batsman_agg, on=['match id'], how='left')
+    combined_df = combined_df.merge(bowler_agg, on=['match id'], how='left')
     final_df = training_df.merge(combined_df, on='match id', how='left')
     return final_df
 
@@ -53,7 +58,7 @@ def main():
     final_df = merge_data(training_df, match_df, batsman_agg, bowler_agg)
     
     # Save the cleaned data
-    final_df.to_csv(r"C:\Users\DELL\Desktop\Amex_Superbowl\t20_prediction_project\data", index=False)
+    final_df.to_csv(r"C:\Users\DELL\Desktop\Amex_Superbowl\t20_prediction_project\data\processed", index=False)
 
 if __name__ == '__main__':
     main()
